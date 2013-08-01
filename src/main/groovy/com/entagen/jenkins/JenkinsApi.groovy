@@ -152,6 +152,11 @@ class JenkinsApi {
         println "deleting job $jobName"
         post(buildPath("job/${jobName}/doDelete"))
     }
+    
+    void wipeOutWorkspace(String jobName) {
+        println "wiping out workspace for job $jobName"
+        post("job/${jobName}/doWipeOutWorkspace")
+    }
 
     void createViewForBranch(BranchView branchView, String nestedWithinView = null, String viewRegex = null) {
         String viewName = branchView.viewName

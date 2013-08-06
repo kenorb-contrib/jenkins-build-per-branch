@@ -95,7 +95,7 @@ class JenkinsApi {
             post(buildPath("job/${missingJob.jobName}/enable"))
         }
     }
-    
+
     void enableJob(ConcreteJob job) {
         post('job/' + job.jobName + '/enable')
     }
@@ -149,13 +149,18 @@ class JenkinsApi {
     }
 
     void deleteJob(String jobName) {
-        println "deleting job $jobName"
+        println "Deleting job $jobName"
         post(buildPath("job/${jobName}/doDelete"))
     }
     
     void wipeOutWorkspace(String jobName) {
-        println "wiping out workspace for job $jobName"
+        println "Wiping out workspace for job $jobName"
         post("job/${jobName}/doWipeOutWorkspace")
+    }
+
+    void enableJob(String jobName) {
+        println "Enable job $jobName"
+        post("job/${jobName}/enable")
     }
 
     void createViewForBranch(BranchView branchView, String nestedWithinView = null, String viewRegex = null) {

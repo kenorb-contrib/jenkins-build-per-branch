@@ -1,7 +1,7 @@
 package com.entagen.jenkins
 
 /*
-Bootstrap class that parses command line arguments, or system properties passed in by jenkins, and starts the jenkins-build-per-branch sync process
+ * Bootstrap class that parses command line arguments, or system properties passed in by jenkins, and starts the jenkins-build-per-branch sync process.
  */
 
 class Main {
@@ -27,6 +27,8 @@ class Main {
             days: [longOpt: 'days',  required: false, args: 1, argName: 'days', description: "Creates jobs with commits within the specified number of days - gradle flag -Ddays=5"],
             dlc: [longOpt: 'disable-last-commit',  required: false, args: 1, argName: 'disableLastCommit', description: "Disables the creation of jobs based on last commit date - gradle flag = -DdisableLastCommit=true"]
             token: [longOpt: 'jenkins-token', required: false, args: 1, argName: 'jenkinsToken', description: "Jenkins token - gradle flag -DjenkinsToken=<jenkinsToken>"]
+            cu: [longOpt: 'cleanup-job-name',  required: false, args: 1, argName: 'cleanupJobName', description: "Deploy Cleanup Job Name - gradle flag -DcleanupJobName=<cleanupJobName>"],
+            jd: [longOpt: 'deploy-base-job-name',  required: false, args: 1, argName: 'deployJobBaseName', description: "Deploy base Job Name - gradle flag -DdeployJobBaseName=<deployJobBaseName>"],
     ]
 
     public static void main(String[] args) {

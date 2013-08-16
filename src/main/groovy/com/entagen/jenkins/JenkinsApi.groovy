@@ -105,6 +105,11 @@ class JenkinsApi {
         Map body = [delay: "0sec", Submit: "Build", json: '{"parameter": {"name": "FLUSH_BUILD"}}']
         post(buildPath('job/' + job.jobName + '/build'), body)
     }
+    
+    void startJobWithParameters(String jobName, postBody = [:]) {
+        println "Starting job ${jobName}."
+        post('job/' + jobName + '/build', postBody)
+    }
 
     String configForMissingJob(ConcreteJob missingJob, List<TemplateJob> templateJobs) {
         TemplateJob templateJob = missingJob.templateJob
@@ -258,11 +263,6 @@ class JenkinsApi {
         if (crumbInfo) {
             params[crumbInfo.field] = crumbInfo.crumb
         }
-
-
-
-
-
 
         HTTPBuilder http = new HTTPBuilder(jenkinsServerUrl)
 

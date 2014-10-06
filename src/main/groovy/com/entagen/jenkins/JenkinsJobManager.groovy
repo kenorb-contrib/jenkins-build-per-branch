@@ -16,9 +16,7 @@ class JenkinsJobManager {
     String workspacePath
     String folderPath
     String jenkinsToken
-    String cleanupJobName
-    String deployJobBaseName
-    
+
     Boolean dryRun = false
     Boolean noViews = false
     Boolean noDelete = false

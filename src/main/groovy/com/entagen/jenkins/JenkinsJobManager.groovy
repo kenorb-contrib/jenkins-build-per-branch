@@ -89,7 +89,17 @@ class JenkinsJobManager {
         if (!deprecatedJobNames) return
         println "Deleting deprecated jobs:\n\t${deprecatedJobNames.join('\n\t')}"
         deprecatedJobNames.each { String jobName ->
-            jenkinsApi.wipeOutWorkspace(jobName)
+            try {
+                jenkinsApi.wipeOutWorkspace(jobName)
+            }
+            catch(Exception ex) {
+                println "Attempting to stop $jobName since wiping out the workspace failed"
+                jenkinsApi.stopJob(jobName)
+                println "Giving $jobName 15 seconds before wiping out the workspace again"
+                sleep(15000)
+                jenkinsApi.wipeOutWorkspace(jobName)
+            }
+            
             jenkinsApi.deleteJob(jobName)
             deleteDeprecatedDir(jobName)
         }

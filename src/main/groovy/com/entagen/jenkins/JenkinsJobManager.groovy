@@ -75,6 +75,16 @@ class JenkinsJobManager {
         println "Deleting deprecated jobs:\n\t${deprecatedJobNames.join('\n\t')}"
         deprecatedJobNames.each { String jobName ->
             jenkinsApi.deleteJob(jobName)
+            deleteDeprecatedDir(jobName)
+        }
+    }
+
+    private static void deleteDeprecatedDir(String deprecatedDirName) {
+        def workspace = new File('~/workspace')
+        def deprecatedDir = new File(workspace, deprecatedDirName)
+        if (deprecatedDir.exists()) {
+            println "Deleting deprecated dir: $deprecatedDir"
+            deprecatedDir.deleteDir()
         }
     }
 

@@ -12,6 +12,7 @@ class JenkinsJobManager {
     String viewRegex
     String jenkinsUser
     String jenkinsPassword
+    String workspacePath
     
     Boolean dryRun = false
     Boolean noViews = false
@@ -79,8 +80,10 @@ class JenkinsJobManager {
         }
     }
 
-    private static void deleteDeprecatedDir(String deprecatedDirName) {
-        def workspace = new File('~/workspace')
+    private void deleteDeprecatedDir(String deprecatedDirName) {
+        if (!workspacePath) return
+
+        def workspace = new File(workspacePath)
         def deprecatedDir = new File(workspace, deprecatedDirName)
         if (deprecatedDir.exists()) {
             println "Deleting deprecated dir: $deprecatedDir"

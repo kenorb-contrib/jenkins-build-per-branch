@@ -19,6 +19,7 @@ class Main {
             r: [longOpt: 'view-regex', required: false, args: 1, argName: 'viewRegex', description: "Supply a custom regex to be applied to any generated views, overriding the default template regex - gradle flag: -DviewRegex=<regex>"],
             k: [longOpt: 'no-delete', required: false, args: 0, argName: 'noDelete', description: "Do not delete (keep) branches and views - gradle flag -DnoDelete=true"],
             f: [longOpt: 'filter-branch-names', required: false, args:  1, argName:  'branchNameRegex', description: "Only branches matching the regex will be accepted - gradle flag: -DbranchNameRegex=<regex>"],
+            w: [longOpt: 'workspace-path',  required: false, args: 1, argName: 'workspacePath', description: "Jenkins workspace path - gradle flag -DworkspacePath=<workspacePath>"],
             usr: [longOpt: 'jenkins-user',  required: false, args: 1, argName: 'jenkinsUser', description: "Jenkins username - gradle flag -DjenkinsUser=<jenkinsUser>"],
             pwd: [longOpt: 'jenkins-password',  required: false, args: 1, argName: 'jenkinsPassword', description: "Jenkins password - gradle flag -DjenkinsPassword=<jenkinsPassword>"]
     ]

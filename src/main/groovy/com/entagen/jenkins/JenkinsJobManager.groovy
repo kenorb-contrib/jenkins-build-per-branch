@@ -148,9 +148,9 @@ class JenkinsJobManager {
             assert jenkinsUrl != null
             if (dryRun) {
                 println "DRY RUN! Not executing any POST commands to Jenkins, only GET commands"
-                this.jenkinsApi = new JenkinsApiReadOnly(jenkinsServerUrl: jenkinsUrl)
+                this.jenkinsApi = new JenkinsApiReadOnly(jenkinsServerUrl: jenkinsUrl, folderPath: folderPath)
             } else {
-                this.jenkinsApi = new JenkinsApi(jenkinsServerUrl: jenkinsUrl)
+                this.jenkinsApi = new JenkinsApi(jenkinsServerUrl: jenkinsUrl, folderPath: folderPath)
             }
 
             if (jenkinsUser || jenkinsPassword) this.jenkinsApi.addBasicAuth(jenkinsUser, jenkinsPassword)

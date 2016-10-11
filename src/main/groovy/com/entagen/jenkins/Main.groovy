@@ -38,9 +38,6 @@ class Main {
         // this is necessary as Gradle's command line parsing stinks, it only allows you to pass in system properties (or task properties which are basically the same thing)
         // we need to merge in those properties in case the script is being called from `gradle syncWithGit` and the user is giving us system properties
         Map<String, String> argsMap = mergeSystemPropertyOptions(commandLineOptions)
-        println "==============================================================="
-        argsMap.each { k, v -> println "argMap $k: ${formatValue(k, v)}" }
-        println "==============================================================="
 
         if (argsMap.help) {
             cli.usage()

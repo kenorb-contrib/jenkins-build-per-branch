@@ -13,14 +13,16 @@ import org.apache.http.HttpRequest
 
 class JenkinsApi {
     String jenkinsServerUrl
+    String folderPath
     RESTClient restClient
     HttpRequestInterceptor requestInterceptor
     boolean findCrumb = true
     def crumbInfo
 
-    public void setJenkinsServerUrl(String jenkinsServerUrl) {
+    public void setJenkinsServerUrl(String jenkinsServerUrl, String folderPath = null) {
         if (!jenkinsServerUrl.endsWith("/")) jenkinsServerUrl += "/"
         this.jenkinsServerUrl = jenkinsServerUrl
+        this.folderPath = folderPath
         this.restClient = new RESTClient(jenkinsServerUrl)
     }
 
@@ -37,16 +39,24 @@ class JenkinsApi {
         this.restClient.client.addRequestInterceptor(this.requestInterceptor)
     }
 
+    String buildPath(String path) {
+        if (folderPath) {
+            return "${folderPath}/${path}";
+        } else {
+            return path;
+        }
+    }
+
     List<String> getJobNames(String prefix = null) {
         println "getting project names from " + jenkinsServerUrl + "api/json"
-        def response = get(path: 'api/json')
+        def response = get(path: buildPath("api/json"))
         def jobNames = response.data.jobs.name
         if (prefix) return jobNames.findAll { it.startsWith(prefix) }
         return jobNames
     }
 
     String getJobConfig(String jobName) {
-        def response = get(path: "job/${jobName}/config.xml", contentType: TEXT,
+        def response = get(path: buildPath("job/${jobName}/config.xml"), contentType: TEXT,
                 headers: [Accept: 'application/xml'])
         response.data.text
     }
@@ -56,20 +66,20 @@ class JenkinsApi {
         TemplateJob templateJob = missingJob.templateJob
 
         //Copy job with jenkins copy job api, this will make sure jenkins plugins get the call to make a copy if needed (promoted builds plugin needs this)
-        post('createItem', missingJobConfig, [name: missingJob.jobName, mode: 'copy', from: templateJob.jobName], ContentType.XML)
+        post(buildPath('createItem'), missingJobConfig, [name: missingJob.jobName, mode: 'copy', from: templateJob.jobName], ContentType.XML)
 
-        post('job/' + missingJob.jobName + "/config.xml", missingJobConfig, [:], ContentType.XML)
+        post(buildPath("job/${missingJob.jobName}/config.xml"), missingJobConfig, [:], ContentType.XML)
         //Forced disable enable to work around Jenkins' automatic disabling of clones jobs
         //But only if the original job was enabled
-        post('job/' + missingJob.jobName + '/disable')
+        post(buildPath("job/${missingJob.jobName}/disable"))
         if (!missingJobConfig.contains("<disabled>true</disabled>")) {
-            post('job/' + missingJob.jobName + '/enable')
+            post(buildPath("job/${missingJob.jobName}/enable"))
         }
     }
 
     void startJob(ConcreteJob job) {
         println "Starting job ${job.jobName}."
-        post('job/' + job.jobName + '/build')
+        post(buildPath("job/${job.jobName}/build"))
     }
 
     String configForMissingJob(ConcreteJob missingJob, List<TemplateJob> templateJobs) {
@@ -99,7 +109,7 @@ class JenkinsApi {
 
     void deleteJob(String jobName) {
         println "deleting job $jobName"
-        post("job/${jobName}/doDelete")
+        post(buildPath("job/${jobName}/doDelete"))
     }
 
     void createViewForBranch(BranchView branchView, String nestedWithinView = null, String viewRegex = null) {
@@ -130,9 +140,11 @@ class JenkinsApi {
         List elems = nestedViews.findAll { it != null }
         String viewPrefix = elems.collect { "view/${it}" }.join('/')
 
-        if (viewPrefix) return "$viewPrefix/$pathSuffix"
+        String outPath = folderPath ? "${folderPath}/" : ""
+        if (viewPrefix) outPath += "$viewPrefix/$pathSuffix"
+        else outPath += pathSuffix
 
-        return pathSuffix
+        return outPath
     }
 
     protected get(Map map) {
@@ -171,7 +183,7 @@ class JenkinsApi {
             findCrumb = false
             println "Trying to find crumb: ${jenkinsServerUrl}crumbIssuer/api/json"
             try {
-                def response = restClient.get(path: "crumbIssuer/api/json")
+                def response = restClient.get(path: buildPath("crumbIssuer/api/json"))
 
                 if (response.data.crumbRequestField && response.data.crumb) {
                     crumbInfo = [:]

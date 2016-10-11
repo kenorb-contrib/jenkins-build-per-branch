@@ -12,6 +12,7 @@ class JenkinsJobManager {
     String viewRegex
     String jenkinsUser
     String jenkinsPassword
+    String folderPath
     
     Boolean dryRun = false
     Boolean noViews = false

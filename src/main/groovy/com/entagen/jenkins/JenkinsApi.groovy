@@ -72,6 +72,8 @@ class JenkinsApi {
     }
 
     String getJobConfig(String jobName) {
+        // Please note that for this to work it requires that the authenticated user have ExtendedRead permission or it
+        // will return HTTP 403 (Forbidden). See `/role-strategy/manage-roles`.
         def response = get(path: buildPath("job/${jobName}/config.xml"), contentType: TEXT,
                 headers: [Accept: 'application/xml'])
         response.data.text
@@ -101,13 +103,13 @@ class JenkinsApi {
     }
 
     void startJob(ConcreteJob job) {
-        println "Starting job ${job.jobName}."
+        println "Starting job ${job.jobName}"
         Map body = [delay: "0sec", Submit: "Build", json: '{"parameter": {"name": "FLUSH_BUILD"}}']
         post(buildPath('job/' + job.jobName + '/build'), body)
     }
     
     void startJobWithParameters(String jobName, postBody = [:]) {
-        println "Starting job ${jobName}."
+        println "Starting job ${jobName}"
         post('job/' + jobName + '/build', postBody)
     }
 

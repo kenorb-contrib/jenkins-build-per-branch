@@ -4,6 +4,7 @@ import java.util.regex.Pattern
 import groovy.json.JsonSlurper
 
 class JenkinsJobManager {
+
     String templateJobPrefix
     String templateBranchName
     String gitUrl
@@ -76,6 +77,8 @@ class JenkinsJobManager {
 
         for (ConcreteJob missingJob in missingJobs) {
             println "Creating missing job: ${missingJob.jobName} from ${missingJob.templateJob.jobName}"
+
+            // This creates missing jobs using the missingJob name. Note that templateJobs is a List.
             jenkinsApi.cloneJobForBranch(missingJob, templateJobs)
             if (enableJob) {
                 jenkinsApi.enableJob(missingJob.jobName)

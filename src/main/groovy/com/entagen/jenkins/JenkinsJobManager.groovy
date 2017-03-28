@@ -156,7 +156,7 @@ class JenkinsJobManager {
             
             if (this.branchNameRegex){
                 String workingBranchNameRegex = '.*' + this.branchNameRegex.replaceAll('/','_') + '$'
-                this.jenkinsApi = ~workingBranchNameRegex
+                this.jenkinsApi.branchNameFilter = ~workingBranchNameRegex
             }
         }
 

@@ -155,7 +155,7 @@ class JenkinsJobManager {
             if (jenkinsUser || jenkinsPassword) this.jenkinsApi.addBasicAuth(jenkinsUser, jenkinsPassword)
             
             if (this.branchNameRegex){
-                String workingBranchNameRegex = '.*' + this.branchNameRegex.replaceAll('/','_') + '$'
+                String workingBranchNameRegex = '.*' + this.branchNameRegex.replaceAll('/','_') + '$' + '|.*'+ templateBranchName + '$'
                 this.jenkinsApi.branchNameFilter = ~workingBranchNameRegex
             }
         }

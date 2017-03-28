@@ -43,7 +43,6 @@ class JenkinsApi {
         println "getting project names from " + jenkinsServerUrl + "api/json"
         def response = get(path: 'api/json')
         def jobNames = response.data.jobs.name
-         println "All job names: ${jobNames}"
         if(branchNameFilter != null) {
             jobNames = jobNames.findAll {it ==~ branchNameFilter}
             println "Job names after applying filter ${branchNameFilter}: ${jobNames}"

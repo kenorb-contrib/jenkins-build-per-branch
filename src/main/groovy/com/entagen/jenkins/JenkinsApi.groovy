@@ -1,5 +1,6 @@
 package com.entagen.jenkins
 
+import java.util.regex.Pattern
 import groovyx.net.http.ContentType
 import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.RESTClient

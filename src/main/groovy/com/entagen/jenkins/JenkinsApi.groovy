@@ -17,6 +17,7 @@ class JenkinsApi {
     HttpRequestInterceptor requestInterceptor
     boolean findCrumb = true
     def crumbInfo
+    Pattern branchNameFilter = null
 
     public void setJenkinsServerUrl(String jenkinsServerUrl) {
         if (!jenkinsServerUrl.endsWith("/")) jenkinsServerUrl += "/"
@@ -41,6 +42,9 @@ class JenkinsApi {
         println "getting project names from " + jenkinsServerUrl + "api/json"
         def response = get(path: 'api/json')
         def jobNames = response.data.jobs.name
+        if(branchNameFilter != null) {
+            jobNames = jobNames.findAll {it ==~ branchNameFilter}
+        }
         if (prefix) return jobNames.findAll { it.startsWith(prefix) }
         return jobNames
     }

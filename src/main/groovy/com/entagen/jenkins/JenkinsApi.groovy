@@ -61,6 +61,9 @@ class JenkinsApi {
         post('job/' + missingJob.jobName + "/config.xml", missingJobConfig, [:], ContentType.XML)
         //Forced disable enable to work around Jenkins' automatic disabling of clones jobs
         //But only if the original job was enabled
+        if (missingJob.jobName.contains("pipeline")) {
+            return
+        }
         post('job/' + missingJob.jobName + '/disable')
         if (!missingJobConfig.contains("<disabled>true</disabled>")) {
             post('job/' + missingJob.jobName + '/enable')

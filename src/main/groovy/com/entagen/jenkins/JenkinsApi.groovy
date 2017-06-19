@@ -3,13 +3,14 @@ package com.entagen.jenkins
 import groovyx.net.http.ContentType
 import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.RESTClient
-import static groovyx.net.http.ContentType.*
-import org.apache.http.conn.HttpHostConnectException
-import org.apache.http.client.HttpResponseException
-import org.apache.http.HttpStatus
-import org.apache.http.HttpRequestInterceptor
-import org.apache.http.protocol.HttpContext
 import org.apache.http.HttpRequest
+import org.apache.http.HttpRequestInterceptor
+import org.apache.http.HttpStatus
+import org.apache.http.client.HttpResponseException
+import org.apache.http.conn.HttpHostConnectException
+import org.apache.http.protocol.HttpContext
+
+import static groovyx.net.http.ContentType.TEXT
 
 class JenkinsApi {
     String jenkinsServerUrl
@@ -24,13 +25,22 @@ class JenkinsApi {
         this.restClient = new RESTClient(jenkinsServerUrl)
     }
 
-    public void addBasicAuth(String jenkinsServerUser, String jenkinsServerPassword) {
+    public void addBasicAuth(String jenkinsServerUser, String jenkinsServerPassword, String jenkinsToken) {
         println "use basic authentication"
 
-        this.requestInterceptor = new HttpRequestInterceptor() {
-            void process(HttpRequest httpRequest, HttpContext httpContext) {
-                def auth = jenkinsServerUser + ':' + jenkinsServerPassword
-                httpRequest.addHeader('Authorization', 'Basic ' + auth.bytes.encodeBase64().toString())
+        if (jenkinsToken) {
+            this.requestInterceptor = new HttpRequestInterceptor() {
+                void process(HttpRequest httpRequest, HttpContext httpContext) {
+                    def auth = jenkinsServerUser + ':' + jenkinsToken
+                    httpRequest.addHeader('Authorization', 'Basic ' + auth.bytes.encodeBase64().toString())
+                }
+            }
+        } else {
+            this.requestInterceptor = new HttpRequestInterceptor() {
+                void process(HttpRequest httpRequest, HttpContext httpContext) {
+                    def auth = jenkinsServerUser + ':' + jenkinsServerPassword
+                    httpRequest.addHeader('Authorization', 'Basic ' + auth.bytes.encodeBase64().toString())
+                }
             }
         }
 
@@ -82,7 +92,7 @@ class JenkinsApi {
         config = config.replaceAll("(\\p{Alnum}*[>/])(${templateJob.templateBranchName})<") { fullMatch, prefix, branchName ->
             // jenkins job configs may have certain fields whose values should not be replaced, the most common being <assignedNode>
             // which is used to assign a job to a specific node (potentially "master") and the "master" branch
-            if (ignoreTags.find { it + ">" == prefix}) {
+            if (ignoreTags.find { it + ">" == prefix }) {
                 return fullMatch
             } else {
                 return "$prefix${missingJob.branchName}<"
@@ -177,8 +187,7 @@ class JenkinsApi {
                     crumbInfo = [:]
                     crumbInfo['field'] = response.data.crumbRequestField
                     crumbInfo['crumb'] = response.data.crumb
-                }
-                else {
+                } else {
                     println "Found crumbIssuer but didn't understand the response data trying to move on."
                     println "Response data: " + response.data
                 }
@@ -186,8 +195,7 @@ class JenkinsApi {
             catch (HttpResponseException e) {
                 if (e.response?.status == 404) {
                     println "Couldn't find crumbIssuer for jenkins. Just moving on it may not be needed."
-                }
-                else {
+                } else {
                     def msg = "Unexpected failure on ${jenkinsServerUrl}crumbIssuer/api/json: ${resp.statusLine} ${resp.status}"
                     throw new Exception(msg)
                 }

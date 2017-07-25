@@ -3,6 +3,8 @@ package com.entagen.jenkins
 import java.util.regex.Pattern
 import groovy.json.JsonSlurper
 
+Boolean failed = false
+
 class JenkinsJobManager {
 
     String templateJobPrefix
@@ -43,7 +45,9 @@ class JenkinsJobManager {
         initGitApi()
     }
 
-    void syncWithRepo() {
+    Boolean syncWithRepo() {
+        failed = false
+
         List<String> allBranchNames = gitApi.branchNames.unique{ it.toLowerCase() }
         List<String> allJobNames = jenkinsApi.jobNames
 
@@ -57,6 +61,8 @@ class JenkinsJobManager {
         if (!noViews) {
             syncViews(allBranchNames)
         }
+
+        return failed
     }
 
     public void syncJobs(List<String> allBranchNames, List<String> allJobNames, List<TemplateJob> templateJobs) {
@@ -77,14 +83,23 @@ class JenkinsJobManager {
 
         for (ConcreteJob missingJob in missingJobs) {
             println "Creating missing job: ${missingJob.jobName} from ${missingJob.templateJob.jobName}"
+            try {
+                // This creates missing jobs using the missingJob name. Note that templateJobs is a List.
+                jenkinsApi.cloneJobForBranch(missingJob, templateJobs)
 
-            // This creates missing jobs using the missingJob name. Note that templateJobs is a List.
-            jenkinsApi.cloneJobForBranch(missingJob, templateJobs)
-            if (enableJob) {
-                jenkinsApi.enableJob(missingJob.jobName)
+                // This creates missing jobs using the missingJob name. Note that templateJobs is a List.
+                jenkinsApi.cloneJobForBranch(missingJob, templateJobs)
+                if (enableJob) {
+                    jenkinsApi.enableJob(missingJob.jobName)
+                }
+                if (startOnCreate) {
+                    jenkinsApi.startJob(missingJob)
+                }
             }
-            if (startOnCreate) {
-                jenkinsApi.startJob(missingJob)
+            catch(Exception ex) {
+                println(ex.getMessage());
+                println(ex.getStackTrace());
+                failed = true
             }
         }
     }
@@ -95,13 +110,12 @@ class JenkinsJobManager {
         deprecatedJobNames.each { String jobName ->
             try {
                 jenkinsApi.wipeOutWorkspace(jobName)
+                jenkinsApi.deleteJob(jobName)
             }
             catch(Exception ex) {
-                println "Attempting to stop $jobName since wiping out the workspace failed"
-                jenkinsApi.stopJob(jobName)
-                println "Giving $jobName 15 seconds before wiping out the workspace again"
-                sleep(15000)
-                jenkinsApi.wipeOutWorkspace(jobName)
+                println(ex.getMessage());
+                println(ex.getStackTrace());
+                failed = true
             }
 
             jenkinsApi.deleteJob(jobName)

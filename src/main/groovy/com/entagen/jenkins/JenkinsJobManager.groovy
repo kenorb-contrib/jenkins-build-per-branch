@@ -3,8 +3,6 @@ package com.entagen.jenkins
 import java.util.regex.Pattern
 import groovy.json.JsonSlurper
 
-Boolean failed = false
-
 class JenkinsJobManager {
 
     String templateJobPrefix
@@ -19,16 +17,16 @@ class JenkinsJobManager {
     String workspacePath
     String folderPath
     String jenkinsToken
+    String days
+    String[] booleanOpts = [ "dryRun", "noViews", "noDelete", "startOnCreate" ]
 
     Boolean dryRun = false
     Boolean noViews = false
     Boolean noDelete = false
     Boolean startOnCreate = false
     Boolean enableJob = false
-    String days
     Boolean disableLastCommit
-
-    String[] booleanOpts = [ "dryRun", "noViews", "noDelete", "startOnCreate" ]
+    Boolean failed = false
 
     JenkinsApi jenkinsApi
     GitApi gitApi
@@ -46,7 +44,7 @@ class JenkinsJobManager {
     }
 
     Boolean syncWithRepo() {
-        failed = false
+        this.failed = false
 
         List<String> allBranchNames = gitApi.branchNames.unique{ it.toLowerCase() }
         List<String> allJobNames = jenkinsApi.jobNames
@@ -62,7 +60,7 @@ class JenkinsJobManager {
             syncViews(allBranchNames)
         }
 
-        return failed
+        return this.failed
     }
 
     public void syncJobs(List<String> allBranchNames, List<String> allJobNames, List<TemplateJob> templateJobs) {
@@ -99,7 +97,7 @@ class JenkinsJobManager {
             catch(Exception ex) {
                 println(ex.getMessage());
                 println(ex.getStackTrace());
-                failed = true
+                this.failed = true
             }
         }
     }
@@ -115,7 +113,7 @@ class JenkinsJobManager {
             catch(Exception ex) {
                 println(ex.getMessage());
                 println(ex.getStackTrace());
-                failed = true
+                this.failed = true
             }
 
             jenkinsApi.deleteJob(jobName)

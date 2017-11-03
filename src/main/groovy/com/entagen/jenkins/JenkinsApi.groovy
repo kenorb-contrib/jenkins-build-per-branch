@@ -88,10 +88,12 @@ class JenkinsApi {
                 return "$prefix${missingJob.branchName}<"
             }
         }
-        String branchTemplate;
-        String oldBranch;
+        String branchTemplate = "";
+        String oldBranch = "";
 
         if(config.contains(("<hudson.plugins.git.BranchSpec><name>"))){
+            println("cloned config:")
+            println(config)
             int s = config.indexOf("BranchSpec><name>") +17;
             int e = config.indexOf("</name>");
 
@@ -101,8 +103,11 @@ class JenkinsApi {
             branchTemplate = missingJob.jobName.substring(s);
 
         }
-        config = config.replace("BranchSpec><name>"+oldBranch+"</name>","BranchSpec><name>"+oldBranch+branchTemplate+"</name>");
-
+        if(branchTemplate !="" && oldBranch !="") {
+            config = config.replace("BranchSpec><name>" + oldBranch + "</name>", "BranchSpec><name>" + oldBranch + branchTemplate + "</name>");
+        }
+        println("new config:")
+        println(config)
 
         // this is in case there are other down-stream jobs that this job calls, we want to be sure we're replacing their names as well
         templateJobs.each {

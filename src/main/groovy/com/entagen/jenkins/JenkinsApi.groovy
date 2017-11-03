@@ -92,8 +92,6 @@ class JenkinsApi {
         String oldBranch = "";
 
         if(config.contains("<name>")){
-            println("cloned config:")
-            println(config)
             int s = config.indexOf("<name>") +6;
             int e = config.indexOf("</name>");
 
@@ -106,8 +104,7 @@ class JenkinsApi {
         if(branchTemplate !="" && oldBranch !="") {
             config = config.replace("<name>" + oldBranch + "</name>", "<name>" + oldBranch + branchTemplate + "</name>");
         }
-        println("config now:")
-        println(config)
+
 
         // this is in case there are other down-stream jobs that this job calls, we want to be sure we're replacing their names as well
         templateJobs.each {

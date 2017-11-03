@@ -91,10 +91,10 @@ class JenkinsApi {
         String branchTemplate = "";
         String oldBranch = "";
 
-        if(config.contains(("<hudson.plugins.git.BranchSpec><name>"))){
+        if(config.contains("<name>")){
             println("cloned config:")
             println(config)
-            int s = config.indexOf("BranchSpec><name>") +17;
+            int s = config.indexOf("<name>") +6;
             int e = config.indexOf("</name>");
 
             oldBranch = config.substring(s,e);
@@ -104,7 +104,7 @@ class JenkinsApi {
 
         }
         if(branchTemplate !="" && oldBranch !="") {
-            config = config.replace("BranchSpec><name>" + oldBranch + "</name>", "BranchSpec><name>" + oldBranch + branchTemplate + "</name>");
+            config = config.replace("<name>" + oldBranch + "</name>", "<name>" + oldBranch + branchTemplate + "</name>");
         }
         println("new config:")
         println(config)

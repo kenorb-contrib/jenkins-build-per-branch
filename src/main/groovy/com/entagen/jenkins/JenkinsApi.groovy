@@ -106,7 +106,7 @@ class JenkinsApi {
         if(branchTemplate !="" && oldBranch !="") {
             config = config.replace("<name>" + oldBranch + "</name>", "<name>" + oldBranch + branchTemplate + "</name>");
         }
-        println("new config:")
+        println("config now:")
         println(config)
 
         // this is in case there are other down-stream jobs that this job calls, we want to be sure we're replacing their names as well

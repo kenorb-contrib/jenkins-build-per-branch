@@ -8,7 +8,8 @@ repositories {
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.7'
     compile 'org.apache.ivy:ivy:2.2.0'
-    compile 'commons-cli:commons-cli:1.3.1' // should be part of groovy, but not available when running for some reason
+    // Should be part of groovy, but not available when running for some reason.
+    compile 'commons-cli:commons-cli:1.3.1'
     testCompile 'junit:junit:4.10'
     compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
 }
@@ -28,11 +29,10 @@ idea {
     }
 }
 
-
 task syncWithRepo(dependsOn: 'classes', type: JavaExec) {
     main = 'com.entagen.jenkins.Main'
     classpath = sourceSets.main.runtimeClasspath
-    // pass through specified system properties to the call to main
+    // Pass through specified system properties to the call to main.
     ['help', 'jenkinsUrl', 'jenkinsUser', 'jenkinsPassword', 'gitUrl', 'folderPath', 'templateJobPrefix', 'templateBranchName', 'branchNameRegex', 'nestedView', 'viewRegex', 'printConfig', 'dryRun', 'startOnCreate', 'noViews', 'noDelete', 'enableJob', 'days', 'disableLastCommit', 'workspacePath', 'cleanupJobName', 'deployJobBaseName'].each {
         if (System.getProperty(it)) systemProperty it, System.getProperty(it)
     }
@@ -42,9 +42,3 @@ task syncWithRepo(dependsOn: 'classes', type: JavaExec) {
 task wrapper(type: Wrapper) {
     gradleVersion = '3.0'
 }
-
-
-
-
-
-

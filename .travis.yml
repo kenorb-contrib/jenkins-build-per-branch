@@ -1,0 +1,7 @@
+# .travis.yml - configuration file for the travis continuous integration service
+# see http://about.travis-ci.org/docs/user/languages/php for more hints
+#
+language: java
+
+script:
+  - gradle -DjenkinsUser=jenkins -DgitUrl=https://github.com/kenorb-contrib/jenkins-build-per-branch -DtemplateJobPrefix=CI -DnoViews=true -DtemplateBranchName=feature -DbranchNameRegex=feature\/.+ createSourceDirs

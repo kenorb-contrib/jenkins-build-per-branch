@@ -22,12 +22,18 @@ class JenkinsJobManager {
     String days
     Boolean disableLastCommit
 
+    String[] booleanOpts = [ "dryRun", "noViews", "noDelete", "startOnCreate" ]
+
     JenkinsApi jenkinsApi
     GitApi gitApi
 
     JenkinsJobManager(Map props) {
         for (property in props) {
-            this."${property.key}" = property.value
+            if (property.key in booleanOpts) {
+                this."${property.key}" = property.value.toBoolean()
+            } else {
+                this."${property.key}" = property.value
+            }
         }
         initJenkinsApi()
         initGitApi()
@@ -50,8 +56,8 @@ class JenkinsJobManager {
     }
 
     public void syncJobs(List<String> allBranchNames, List<String> allJobNames, List<TemplateJob> templateJobs) {
-        List<String> currentTemplateDrivenJobNames = templateDrivenJobNames(templateJobs, allJobNames)
         List<String> nonTemplateBranchNames = allBranchNames - templateBranchName
+        List<String> currentTemplateDrivenJobNames = templateDrivenJobNames(templateJobs, allJobNames, nonTemplateBranchNames)
         List<ConcreteJob> expectedJobs = this.expectedJobs(templateJobs, nonTemplateBranchNames)
 
         createMissingJobs(expectedJobs, currentTemplateDrivenJobNames, templateJobs)
@@ -103,12 +109,18 @@ class JenkinsJobManager {
         }.flatten()
     }
 
-    public List<String> templateDrivenJobNames(List<TemplateJob> templateJobs, List<String> allJobNames) {
+    public List<String> templateDrivenJobNames(List<TemplateJob> templateJobs, List<String> allJobNames, List<String>nonTemplateBranchNames) {
         List<String> templateJobNames = templateJobs.jobName
         List<String> templateBaseJobNames = templateJobs.baseJobName
 
+        // Filter out jobs that do not match the prefix-.*-branch pattern
+        String branchRegex=nonTemplateBranchNames.join('|');
+        println "branchRegex: (${branchRegex})"
+        List<String> managedJobNames = allJobNames.findResults { String jobName ->
+        jobName.find(/^($templateJobPrefix-[^-]*)-($branchRegex)$/) { name, base, branch -> name } };
+
         // Don't want actual template jobs, just the jobs that were created from the templates.
-        return (allJobNames - templateJobNames).findAll { String jobName ->
+        return (managedJobNames - templateJobNames).findAll { String jobName ->
             templateBaseJobNames.find { String baseJobName -> jobName.startsWith(baseJobName) && jobName.tokenize("-")[2] ==~ branchNameRegex.replace("/", "_") }
         }
     }
@@ -185,7 +197,7 @@ class JenkinsJobManager {
             }
 
             if (jenkinsUser || jenkinsPassword) this.jenkinsApi.addBasicAuth(jenkinsUser, jenkinsPassword, jenkinsToken)
-            
+
             if (this.branchNameRegex){
                 String workingBranchNameRegex = '.*' + this.branchNameRegex.replaceAll('/','_') + '$' + '|.*'+ templateBranchName + '$'
                 this.jenkinsApi.branchNameFilter = ~workingBranchNameRegex

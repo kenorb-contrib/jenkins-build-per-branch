@@ -17,7 +17,6 @@ class JenkinsJobManager {
     String workspacePath
     String folderPath
     String jenkinsToken
-    String days
     String[] booleanOpts = [ "dryRun", "noViews", "noDelete", "startOnCreate" ]
 
     Boolean dryRun = false
@@ -239,7 +238,7 @@ class JenkinsJobManager {
     GitApi initGitApi() {
         if (!gitApi) {
             assert gitUrl != null
-            this.gitApi = new GitApi(gitUrl: gitUrl, daysSinceLastCommit: days.toInteger(), disableLastCommit: disableLastCommit)
+            this.gitApi = new GitApi(gitUrl: gitUrl, disableLastCommit: disableLastCommit)
             if (this.branchNameRegex) {
                 this.gitApi.branchNameFilter = ~this.branchNameRegex
             }

@@ -24,7 +24,6 @@ class Main {
             e: [longOpt: 'enable-job', required: false, args: 1, argName: 'enableJob', description: "When creating a new job, enable it even if template job was disabled - gradle flag: -DenableJob=true"],
             usr: [longOpt: 'jenkins-user',  required: false, args: 1, argName: 'jenkinsUser', description: "Jenkins username - gradle flag -DjenkinsUser=<jenkinsUser>"],
             pwd: [longOpt: 'jenkins-password',  required: false, args: 1, argName: 'jenkinsPassword', description: "Jenkins password - gradle flag -DjenkinsPassword=<jenkinsPassword>"],
-            days: [longOpt: 'days',  required: false, args: 1, argName: 'days', description: "Creates jobs with commits within the specified number of days - gradle flag -Ddays=5"],
             dlc: [longOpt: 'disable-last-commit',  required: false, args: 1, argName: 'disableLastCommit', description: "Disables the creation of jobs based on last commit date - gradle flag = -DdisableLastCommit=true"],
             token: [longOpt: 'jenkins-token', required: false, args: 1, argName: 'jenkinsToken', description: "Jenkins token - gradle flag -DjenkinsToken=<jenkinsToken>"],
             cu: [longOpt: 'cleanup-job-name',  required: false, args: 1, argName: 'cleanupJobName', description: "Deploy Cleanup Job Name - gradle flag -DcleanupJobName=<cleanupJobName>"],

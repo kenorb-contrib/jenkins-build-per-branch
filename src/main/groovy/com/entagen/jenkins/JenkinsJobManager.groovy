@@ -12,7 +12,7 @@ class JenkinsJobManager {
     String viewRegex
     String jenkinsUser
     String jenkinsPassword
-    
+
     Boolean dryRun = false
     Boolean noViews = false
     Boolean noDelete = false
@@ -95,7 +95,13 @@ class JenkinsJobManager {
     }
 
     List<TemplateJob> findRequiredTemplateJobs(List<String> allJobNames) {
-        String regex = /^($templateJobPrefix-[^-]*)-($templateBranchName)$/
+        String regex = ""
+		if(templateJobPrefix) {
+            regex = /^($templateJobPrefix-[^-]*(?:-[^-]*)?)-($templateBranchName)$/
+		}
+		else {
+            regex = /^([^-]*(?:-[^-]*)?)-($templateBranchName)$/
+		}
 
         List<TemplateJob> templateJobs = allJobNames.findResults { String jobName ->
             TemplateJob templateJob = null
@@ -130,7 +136,12 @@ class JenkinsJobManager {
     }
 
     public List<String> getDeprecatedViewNames(List<String> existingViewNames, List<BranchView> expectedBranchViews) {
+    	if(this.templateJobPrefix) {
          return existingViewNames?.findAll { it.startsWith(this.templateJobPrefix) } - expectedBranchViews?.viewName ?: []
+        }
+        else {
+         return existingViewNames - expectedBranchViews?.viewName ?: []
+        }
     }
 
     public void deleteDeprecatedViews(List<String> deprecatedViewNames) {

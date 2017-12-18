@@ -69,7 +69,8 @@ class JenkinsApi {
 
     void startJob(ConcreteJob job) {
         println "Starting job ${job.jobName}."
-        post('job/' + job.jobName + '/build')
+        Map body = [delay: "0sec", Submit: "Build", json: '{"parameter": {"name": "FLUSH_BUILD"}}']
+        post('job/' + job.jobName + '/build', body)
     }
 
     String configForMissingJob(ConcreteJob missingJob, List<TemplateJob> templateJobs) {
@@ -108,7 +109,7 @@ class JenkinsApi {
         println "creating view - viewName:${viewName}, nestedView:${nestedWithinView}"
         post(buildViewPath("createView", nestedWithinView), body)
 
-        String regex = viewRegex ? viewRegex.replaceAll("master", branchView.safeBranchName) : "${branchView.templateJobPrefix}.*${branchView.safeBranchName}"
+        String regex = viewRegex ? viewRegex.replaceAll("master", branchView.safeBranchName) : "${branchView.templateJobPrefix ?: ""}.*${branchView.safeBranchName}"
         body = [useincluderegex: 'on', includeRegex: regex, name: viewName, json: '{"name": "' + viewName + '","useincluderegex": {"includeRegex": "' + regex + '"},' + VIEW_COLUMNS_JSON + '}']
         println "configuring view ${viewName}"
         post(buildViewPath("configSubmit", nestedWithinView, viewName), body)

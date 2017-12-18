@@ -103,6 +103,23 @@ class JenkinsApi {
                 return "$prefix${missingJob.branchName}<"
             }
         }
+        String branchTemplate = "";
+        String oldBranch = "";
+
+        if(config.contains("<name>")){
+            int s = config.indexOf("<name>") +6;
+            int e = config.indexOf("</name>");
+
+            oldBranch = config.substring(s,e);
+            String branchSafe = oldBranch.replace("/","_");
+            s = missingJob.jobName.indexOf(branchSafe)+branchSafe.length();
+            branchTemplate = missingJob.jobName.substring(s);
+
+        }
+        if(branchTemplate !="" && oldBranch !="") {
+            config = config.replace("<name>" + oldBranch + "</name>", "<name>" + oldBranch + branchTemplate + "</name>");
+        }
+
 
         // this is in case there are other down-stream jobs that this job calls, we want to be sure we're replacing their names as well
         templateJobs.each {

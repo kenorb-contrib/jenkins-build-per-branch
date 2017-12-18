@@ -1,5 +1,6 @@
 package com.entagen.jenkins
 
+import java.util.regex.Pattern
 import groovyx.net.http.ContentType
 import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.RESTClient
@@ -18,6 +19,7 @@ class JenkinsApi {
     HttpRequestInterceptor requestInterceptor
     boolean findCrumb = true
     def crumbInfo
+    Pattern branchNameFilter = null
 
     public void setJenkinsServerUrl(String jenkinsServerUrl, String folderPath = null) {
         if (!jenkinsServerUrl.endsWith("/")) jenkinsServerUrl += "/"
@@ -51,6 +53,10 @@ class JenkinsApi {
         println "getting project names from " + jenkinsServerUrl + buildPath("api/json")
         def response = get(path: buildPath("api/json"))
         def jobNames = response.data.jobs.name
+        if(branchNameFilter != null) {
+            jobNames = jobNames.findAll {it ==~ branchNameFilter}
+            println "Job names after applying filter ${branchNameFilter}: ${jobNames}"
+        }
         if (prefix) return jobNames.findAll { it.startsWith(prefix) }
         return jobNames
     }
@@ -69,17 +75,20 @@ class JenkinsApi {
         post(buildPath('createItem'), missingJobConfig, [name: missingJob.jobName, mode: 'copy', from: templateJob.jobName], ContentType.XML)
 
         post(buildPath("job/${missingJob.jobName}/config.xml"), missingJobConfig, [:], ContentType.XML)
-        //Forced disable enable to work around Jenkins' automatic disabling of clones jobs
-        //But only if the original job was enabled
+        // Forced disable enable to work around Jenkins' automatic disabling of clones jobs.
+        // But only if the original job was enabled.
+        if (missingJob.jobName.contains("pipeline")) {
+            return
+        }
         post(buildPath("job/${missingJob.jobName}/disable"))
         if (!missingJobConfig.contains("<disabled>true</disabled>")) {
             post(buildPath("job/${missingJob.jobName}/enable"))
         }
     }
-	
-	void enableJob(ConcreteJob job) {
-		post('job/' + job.jobName + '/enable')
-	}
+    
+    void enableJob(ConcreteJob job) {
+        post('job/' + job.jobName + '/enable')
+    }
 
     void startJob(ConcreteJob job) {
         println "Starting job ${job.jobName}."
@@ -93,9 +102,9 @@ class JenkinsApi {
 
         def ignoreTags = ["assignedNode", "mergeTarget"]
 
-        // should work if there's a remote ("origin/master") or no remote (just "master")
+        // Should work if there's a remote ("origin/master") or no remote (just "master").
         config = config.replaceAll("(\\p{Alnum}*[>/])(${templateJob.templateBranchName})<") { fullMatch, prefix, branchName ->
-            // jenkins job configs may have certain fields whose values should not be replaced, the most common being <assignedNode>
+            // Jenkins job configs may have certain fields whose values should not be replaced, the most common being <assignedNode>
             // which is used to assign a job to a specific node (potentially "master") and the "master" branch
             if (ignoreTags.find { it + ">" == prefix}) {
                 return fullMatch

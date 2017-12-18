@@ -1,9 +1,9 @@
 package com.entagen.jenkins
 
-
 /*
 Bootstrap class that parses command line arguments, or system properties passed in by jenkins, and starts the jenkins-build-per-branch sync process
  */
+
 class Main {
     public static final Map<String, Map<String, Object>> opts = [
             h: [longOpt: 'help', required: false, args: 0, argName: 'help', description: "Print usage information - gradle flag -Dhelp=true"],
@@ -26,6 +26,7 @@ class Main {
             pwd: [longOpt: 'jenkins-password',  required: false, args: 1, argName: 'jenkinsPassword', description: "Jenkins password - gradle flag -DjenkinsPassword=<jenkinsPassword>"],
             days: [longOpt: 'days',  required: false, args: 1, argName: 'days', description: "Creates jobs with commits within the specified number of days - gradle flag -Ddays=5"],
             dlc: [longOpt: 'disable-last-commit',  required: false, args: 1, argName: 'disableLastCommit', description: "Disables the creation of jobs based on last commit date - gradle flag = -DdisableLastCommit=true"]
+            token: [longOpt: 'jenkins-token', required: false, args: 1, argName: 'jenkinsToken', description: "Jenkins token - gradle flag -DjenkinsToken=<jenkinsToken>"]
     ]
 
     public static void main(String[] args) {
@@ -57,8 +58,8 @@ class Main {
             if (optMap.required) return !argsMap."${optMap.argName}"
         }
 
-        if(missingArgs) {
-            missingArgs.each {shortOpt, missingArg -> println "missing required argument: ${missingArg.argName}"}
+        if (missingArgs) {
+            missingArgs.each { shortOpt, missingArg -> println "missing required argument: ${missingArg.argName}" }
             cli.usage()
             System.exit(1)
         }
@@ -85,11 +86,17 @@ class Main {
     }
 
     public static formatValue(String key, String value) {
-        return (key == "jenkinsPassword") ? "********" : value
+        if (key == "jenkinsPassword") {
+            return "********"
+        }
+        if (key == "jenkinsToken") {
+            return "********"
+        }
+        return value
     }
 
     public static Map<String, String> mergeSystemPropertyOptions(OptionAccessor commandLineOptions) {
-        Map <String, String> mergedArgs = [:]
+        Map<String, String> mergedArgs = [:]
         opts.each { String shortOpt, Map<String, String> optMap ->
             if (optMap.argName) {
                 mergedArgs[optMap.argName] = commandLineOptions."$shortOpt" ?: System.getProperty(optMap.argName)

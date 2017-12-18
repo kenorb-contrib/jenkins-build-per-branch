@@ -14,7 +14,7 @@ class JenkinsJobManager {
     String jenkinsPassword
     String workspacePath
     String folderPath
-    
+
     Boolean dryRun = false
     Boolean noViews = false
     Boolean noDelete = false
@@ -68,10 +68,10 @@ class JenkinsJobManager {
         for(ConcreteJob missingJob in missingJobs) {
             println "Creating missing job: ${missingJob.jobName} from ${missingJob.templateJob.jobName}"
             jenkinsApi.cloneJobForBranch(missingJob, templateJobs)
-			if(enableJob) {
-				jenkinsApi.enableJob(missingJob)
-			}
-			if (startOnCreate) {
+            if(enableJob) {
+                jenkinsApi.enableJob(missingJob)
+            }
+            if (startOnCreate) {
                 jenkinsApi.startJob(missingJob)
             }
         }
@@ -116,12 +116,12 @@ class JenkinsJobManager {
 
     List<TemplateJob> findRequiredTemplateJobs(List<String> allJobNames) {
         String regex = ""
-		if(templateJobPrefix) {
-            regex = /^($templateJobPrefix-[^-]*(?:-[^-]*)?)-($templateBranchName)$/
-		}
-		else {
+        if(templateJobPrefix) {
+            regex = /^($templateJobPrefix(?:-[^-])*(?:-[^-]*)?)-($templateBranchName)$/
+        }
+        else {
             regex = /^([^-]*(?:-[^-]*)?)-($templateBranchName)$/
-		}
+        }
 
         List<TemplateJob> templateJobs = allJobNames.findResults { String jobName ->
             TemplateJob templateJob = null
@@ -156,7 +156,7 @@ class JenkinsJobManager {
     }
 
     public List<String> getDeprecatedViewNames(List<String> existingViewNames, List<BranchView> expectedBranchViews) {
-    	if(this.templateJobPrefix) {
+        if(this.templateJobPrefix) {
          return existingViewNames?.findAll { it.startsWith(this.templateJobPrefix) } - expectedBranchViews?.viewName ?: []
         }
         else {
